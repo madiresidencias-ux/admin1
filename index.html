@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gobierno Municipal de Tuxtepec — Reels</title>
+
+  <!-- Estilos existentes del sitio -->
+  <link rel="stylesheet" href="https://tuxtepec.gob.mx/sitio/styles/styles.css">
+  <link rel="stylesheet" href="https://tuxtepec.gob.mx/sitio/styles/sesicabi.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="https://tuxtepec.gob.mx/sitio/img/HASJBTuxtepec_LogoSlogan-v1.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <!-- (Opcional) Hoja de estilos propia -->
+  <link rel="stylesheet" href="https://tuxtepec.gob.mx/sitio/styles/vidytrans.css">
+
+  <!-- Estilos mínimos para la galería (RESPONSIVE + FIXES) -->
+  <style>
+    :root{
+      --vino:#8b1e3f;
+      --vino2:#b53a5f;
+      --card-bg:#fff;
+    }
+    html,body{scroll-behavior:smooth}
+    body{font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji",sans-serif}
+
+    .reels-wrap{max-width:1300px;margin:40px auto;padding:0 16px}
+
+    /* GRID: 2 en móvil chico, 3 en >=400, 3 en >=640, 5 en >=1024, 6 en >=1280 */
+    .grid-reels{
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:10px!important
+    }
+    @media (min-width:400px){.grid-reels{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+    @media (min-width:640px){.grid-reels{grid-template-columns:repeat(3,minmax(180px,1fr))!important}}
+    @media (min-width:1024px){.grid-reels{grid-template-columns:repeat(5,minmax(180px,1fr))!important}}
+    @media (min-width:1280px){.grid-reels{grid-template-columns:repeat(6,minmax(180px,1fr))!important}}
+
+    /* ===== Card con borde degradado + sombra ===== */
+    .card-reel{
+      border:1px solid transparent;
+      background:
+        linear-gradient(var(--card-bg),var(--card-bg)) padding-box,
+        radial-gradient(120% 160% at 50% -10%,rgba(181,58,95,.25),rgba(139,30,63,.08)) border-box;
+      border-radius:14px; box-shadow:0 12px 28px rgba(0,0,0,.08);
+      display:flex; flex-direction:column; overflow:hidden;
+      transition:opacity .25s, transform .25s, box-shadow .2s;
+      min-width:180px;
+    }
+    .card-reel:hover{box-shadow:0 18px 40px rgba(0,0,0,.12)}
+    .card-reel.is-appearing{opacity:0;transform:translateY(6px)}
+    .card-reel.is-appearing.show{opacity:1;transform:none}
+
+    /* Video / thumbnail */
+    .media{position:relative;background:#000;aspect-ratio:9/16;border-bottom:1px solid #eee}
+    .media iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;transform:none!important}
+
+    /* Skeleton */
+    .media .skeleton{position:absolute;inset:0;border-radius:8px;
+      background:linear-gradient(90deg,#1f2937 0%,#374151 50%,#1f2937 100%);
+      background-size:200% 100%;animation:shine 1.1s linear infinite}
+    @keyframes shine{0%{background-position:0% 0}100%{background-position:200% 0}}
+    .media.loaded .skeleton{opacity:0;pointer-events:none;transition:opacity .25s}
+
+    /* Descripción con clamp y “ver más” */
+    .desc{padding:12px 14px;font-size:14px;color:#444;line-height:1.45;white-space:pre-line;position:relative}
+    .desc.is-clamped{display:-webkit-box;-webkit-line-clamp:var(--lines,4);-webkit-box-orient:vertical;overflow:hidden}
+    .desc.is-clamped::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3em;
+      background:linear-gradient(to bottom,rgba(255,255,255,0),var(--card-bg));pointer-events:none}
+    .btn-more{
+      margin:4px 12px 14px;border:1px solid #d7dbe2;background:#f7f8fb;border-radius:10px;
+      padding:8px 12px;font:600 14px/1.1 Poppins,system-ui,sans-serif;color:#374151;cursor:pointer;align-self:flex-start;
+      transition:transform .08s, background .2s
+    }
+    .btn-more:hover{transform:translateY(-1px)}
+
+    /* Modal */
+    #reelModal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000}
+    #reelModal.open{display:flex}
+    .modal-box{width:min(92vw,820px);border-radius:16px;overflow:hidden;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+    .modal-media{position:relative;aspect-ratio:9/16}
+    .modal-media iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .modal-close{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+    /* Hero */
+    .hero-height{height:220px}
+    @media (min-width:768px){.hero-height{height:320px}}
+
+    /* Footer: mapa responsivo */
+    .footer-map{width:100%;max-width:520px}
+    .map-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+    .map-wrap iframe{position:absolute;inset:0;width:100%!important;height:100%!important;border:0}
+
+    /* Accesibilidad prefer-reduced-motion */
+    @media (prefers-reduced-motion:reduce){
+      .card-reel,.btn-more{transition:none}
+    }
+  </style>
+</head>
+
+<body class="w-full">
+  <!-- =================== HERO / NAV =================== -->
+  <div class="main-container">
+    <div class="relative hero-height w-full" style="position: sticky; top: 0; z-index: 0;">
+      <nav class="relative z-50 bg-black bg-opacity-30">
+        <div class="custom-container">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex-shrink-0">
+              <span class="logo-text text-2xl md:text-3xl font-black tracking-widest uppercase">
+                <a href="https://tuxtepec.gob.mx/printe.html" class="block py-2 text-white hover:text-red-900">TUXTEPEC</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Imagen de fondo -->
+      <img src="https://tuxtepec.gob.mx/sitio/img/gobierno.jpg"
+           onerror="this.onerror=null; this.src='https://tuxtepec.gob.mx/sitio/img/gobierno.jpg';"
+           alt="Tuxtepec"
+           class="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000"
+           id="backgroundImage">
+
+      <!-- Contenedores opcionales -->
+      <div class="lime-container" id="limeContainer">
+        <img src="https://tuxtepec.gob.mx/sitio/img/limon.jpg" alt="Limón"
+             class="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-1000" id="limeImage">
+      </div>
+      <div class="sugarcane-container" id="sugarcaneContainer">
+        <img src="https://tuxtepec.gob.mx/sitio/img/cana.jpg" alt="Caña"
+             class="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-1000" id="sugarcaneImage">
+      </div>
+      <div class="corn-container" id="cornContainer">
+        <img src="https://tuxtepec.gob.mx/sitio/img/maiz.jpg" alt="Maíz"
+             class="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-1000" id="cornImage">
+      </div>
+      <div class="banana-container" id="bananaContainer">
+        <img src="https://tuxtepec.gob.mx/sitio/img/platano.jpg" alt="Plátano"
+             class="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-1000" id="bananaImage">
+      </div>
+      <div class="rabbit-container" id="rabbitContainer">
+        <img src="https://tuxtepec.gob.mx/sitio/img/conejo_final.gif" alt="Conejo"
+             class="w-1/2 h-1/2 object-contain absolute left-0 top-1/2 transform -translate-y-1/2 opacity-0 transition-all duration-1000" id="rabbitImage">
+      </div>
+
+      <!-- Capa oscura -->
+      <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+    </div>
+  </div>
+
+  <h2 class="text-center text-2xl md:text-3xl font-black tracking-widest uppercase mb-4 px-4">ACCIONES DE GOBIERNO</h2>
+
+  <!-- =================== GALERÍA DE REELS =================== -->
+  <section class="reels-wrap">
+    <div class="grid-reels"><!-- (FIX: antes faltaba cerrar este div) -->
+
+      <!-- ==== Tarjetas (iframes tal cual) ==== -->
+      <!-- 1 -->
+      <article class="card-reel is-appearing" data-lines="4">
+        <div class="media">
+          <div class="skeleton"></div>
+          <iframe loading="lazy"
+            src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F655214713726538%2F&show_text=false&autoplay=0&mute=1"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+        </div>
+                <div class="desc">¡Cuidado con el dengue! ✅ Elimina cacharros y recipientes con agua estancada.
+                    ✅ Mantén tu hogar y patio siempre limpios.
+                    🚫 No te automediques, acude al médico ante cualquier síntoma.🦟
+                    Recuerda: Sin mosco, no hay dengue. ¡Juntos Sí Podemos!
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 1 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1153118499971191%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">👞“Calzando con Amor” es alegría y ahorro. Madres y padres de familia reconocen la
+                    buena acción del Presidente Municipal Fernando Huerta Cerecedo, al apoyar a sus hijos en este
+                    regreso a clases, donde los gastos son importantes. Con estas acciones seguimos demostrando que
+                    ¡Juntos Sí Podemos!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 3 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F24196017203374505%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🚖 ¡Festejamos a nuestros taxistas!En el Día del Taxista Oaxaqueño, el Presidente
+                    Municipal Fernando Huerta Cerecedo entregó paquetes alimentarios y reconoció su valiosa labor.
+                    ¡Felicidades! 🚖.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 4 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F732256576108608%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🍍Ping pong… con la Delegación Flor de Piña 2025 Entrevistamos a algunas integrantes
+                    de Flor de Piña, al Presidente
+                    Fernando Huerta y a la Presidenta del DIF, Gaby Delgado. ¡Imperdible!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 5 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F24160627336889891%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🤗Conoce más sobre las creaciones chinantecas y mazatecas que las Piñitas portan en
+                    sus presentaciones. 🧶🧵🪡Textiles y accesorios espectaculares que no puedes dejar de conocer.iViva
+                    nuestra región!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 7 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1734107314657380%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🧵 ¿Sabes cómo está constituida la indumentaria de nuestras Piñitas?
+                    🍍 Te invitamos a conocer importantes aspectos, así como la inversión en algunas de estas hermosas
+                    piezas textiles elaboradas por manos artesanas.
+
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 8 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1868439830389150%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🍍 Aún hay muchas cosas por conocer sobre “Flor de Piña” y el Director Artístico de la
+                    Delegación 2025, Juan Luis Perez Benítez, nos lo comparte👇 ¡Viva la Cuenca del Papaloapan!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 9 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2062853127574198%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🍍¡La Guelaguetza es compartir! Apoyamos con orgullo a nuestras “Piñitas” en todo lo
+                    necesario: uniformes, ofrendas y mucho cariño, para que brillen en la máxima fiesta de las y los
+                    oaxaqueños. Tuxtepec las cuida, las respalda y se enorgullece de cada una de ellas. ¡Gracias por
+                    representarnos con tanto amor y dignidad!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 10 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F670393256017096%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🍍 Las “Piñitas”nos compartieron su sentir momentos antes de emprender el anhelado
+                    viaje a la máxima fiesta de las y los oaxaqueños. Te invitamos a conocer lo que desde el corazón
+                    ❤️dijeron entre las buenas vibras de sus familiares y autoridades. Sin duda representarán
+                    extraordinariamente a la Cuenca del Papaloapan.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 11 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1095144752088165%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Los compromisos se cumplen y mejoran la imagen de nuestra ciudad. El Presidente
+                    Municipal Fernando Huerta inició la instalación de 40 paraderos de autobús, después de años de falta
+                    de estructuras cómodas y seguras para los usuarios. Con mobiliario nuevo e iluminada seguimos
+                    cuidamos de las y los tuxtepecanos. iJuntos Sí Podemos!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 12 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1797623884486019%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">iLista “Flor de Piña“ para actividades previas y durante La Guelaguetza! Tuxtepec y la
+                    Cuenca del Papaloapan tendrán presencia con el aclamado baile en escenarios como: 🍍 La rotonda de
+                    las Azucenas en las 4 funciones de los Lunes de Cerro.🎤 Concierto de la cantante internacional Lila
+                    Downs. Previo a ello tendrán una misa de acción de gracias en la Catedral.Conoce más sobre este
+                    itinerario⬇️ ¡Baila, baila Flor de Piña!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 13 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1634051643926631%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Logramos rescatar otra familia Tlacuache! El personal de la Dirección del Albergue de
+                    Mascotas acudió al llamado para recuperar a una mamá Tlacuache y a sus crías del motor de un
+                    vehículo. Hoy tienen una nueva oportunidad de vida, gracias al apoyo de la Unidad de Manejo Animal
+                    (UMA) deL ITCP. Recuerda que los marsupiales ayudan al control de nuestro entorno. ¡Juntos sí
+                    podemos!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 15 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F745113214847463%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🚕 Trabajamos de la mano con el transporte público para mejorar la movilidad.
+                    👨 👩 Sitios y conductores de taxis se unen al programa "Conduce, Controla y Conecta" para que
+                    usuarios reciban trato digno y se sientan más seguros.
+                    👍 ¡Fernando Huerta sí cumple!.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 16 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F636034749482558%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🤗 ¡Tuxtepec avanza con el esfuerzo de todas y todos!
+                    🚧 Ya se pusieron en marcha obras para el beneficio de cientos de familias de:
+                    -Papaloapan
+                    -San Bartolo
+                    -Sebastopol
+                    -Camelia Roja
+                    🤝 ¡Juntos sí podemos construir un mejor futuro!
+                    #ObrasQueMejoranTuVida.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 17 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F666994829433242%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">¡100 Días de Trabajo y Resultados! En el centro de Tuxtepec ya se nota el cambio: más
+                    orden, movilidad y respeto para peatones y conductores. Con apoyo de la Policía Vial, nueva
+                    señalética y espacios regulados, estamos recuperando el orden en nuestra zona comercial.¡Porque
+                    Tuxtepec lo merece!#JuntosSíPodemos #100DíasDeCambio.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 18 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1229932915159062%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🦋 Llega la Primavera y nuestro Parque Juárez se embellece para recibirla con alegría.
+                    Ven con tu familia y tómense la foto en el andador de las mariposas qué tenemos para todos ustedes.
+                    🦋
+                    #JuntosSiPodemos.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 19 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F954006726800279%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">¡¡Llego el Día!! Mañana martes arranca nuestro Carnaval 2025, no te puedes perder a
+                    partir de las 6 de la tarde la Quema del Mal Humor, con el show de Chuponcito.</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 20 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1384785152958751%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Se inaugura el trenecito municipal , Totalmente GRATIS!!! Estará funcionando todos los
+                    fines de semana \\\ Viernes Sábado y domingo a partir de las 6 pm. </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 21 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1183415053413744%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🕊️ Este día 200 parejas se dieron el Sí Acepto en matrimonio civil dentro de las
+                    Bodas Colectivas 2025 que coordinaron el DIF Tuxtepec "Trabajando con el Corazón" y el Registro
+                    Civil Estatal
+                    En sus mensaje nuestro Presidente Fernando Huerta Cerecedo y su Esposa Ana Gabriela Delgado
+                    coincidieron en aconsejar a las nuevas parejas que siempre haya Amor, comunicación, comprensión,
+                    tolerancia y respeto en sus nuevas familias.
+                    ¡Felicidades a las nuevas parejas y que viva el amor! 💓
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 22 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2144851922637529%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">🎉 Vive nuestro Carnaval 2025 del 11 al 16 Marzo.
+
+
+
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+
+            </article>
+
+            <!-- 23 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1318031252854282%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">😎 Toda la Diversión y el Humor de Chuponcito en el Carnaval Tuxtepec 2025.
+                    Los esperamos en la Quema del Mal Humor este 11 de Marzo y todos a divertirse en el regreso de la
+                    Gran Fiesta de Tuxtepec 🎉
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 24 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F661627759528399%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">TOUR BÉLICOS ENAMORADOS Memo Garza |Artista confirmado|nos acompaña el 14 de marzo en
+                    el #CarnavalTuxtepec2025 🎭.</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 25 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F539491881813157%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">TOUR BÉLICOS ENAMORADOS Lenin Ramirez |Artista confirmado|nos acompaña el 14 de marzo
+                    en el #CarnavalTuxtepec2025 🎭.</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 26 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1283710499361703%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">💞 Te esperamos Este Día del Amor y la Amistad en el EmprendeTux 2025 donde
+                    encontrarás el regalo Ideal para tu ser amado 💞
+                    Te esperan más de 100 emprendedores en el Parque Juárez este viernes y sábado de 2 pm. a 11 pm. 😙
+                    Apoyemos al Comercio Local🙌🏻
+                    #JuntosSiPodemos
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 27 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1328293598374845%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">TOUR BÉLICOS ENAMORADOS. El Komander |Artista confirmado|nos acompaña el 14 de marzo
+                    en el #CarnavalTuxtepec2025 🎭. </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 28 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1252224775873715%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Porfi Balboa y sus Adolescentes 🎭nos acompañan en el #CarnavalTuxtepec2025.
+
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 29 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F896176959102422%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Inauguración del Primer Centro de Rehabilitación Infantil de Tuxtepec CRITUX Fernando
+                    Huerta Cerecedo Gabriela Delgado de Huerta. </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 30 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F8807222192739002%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">La seguridad en Tuxtepec se fortalece con 13 nuevas patrullas y moto patrullas, un
+                    compromiso más que el Presidente Municipal Fernando Huerta Cerecedo cumple a la ciudadanía. ¡juntos
+                    Si Podemos! ✅#FernandoCumple</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 31 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1286572525893660%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Así se vivió este lunes la Feria en el Día de Reyes, donde los juegos fueron
+                    totalmente gratis gracias al Gobierno Municipal y el Presidente Municipal Fernando Huerta Cerecedo.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 32 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2557899134399591%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Madres solteras son apoyadas por el Gobierno Municipal en el pago de sus impuestos,
+                    además son atendidas de forma rápida y amable en el DIF Municipal en la entrega de constancias
+                    gratuitas para la condonación de su predial ✅ #FernandoCumple</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 33 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1238665977227794%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Ven a disfrutar de la feria Totalmente gratis!! Te invita el Gobierno Municipal
+                    Tuxtepec 2025-2027 encabezado por Fernando Huerta Cerecedo</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 34 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1560549641258749%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Primer Acto Cívico del 2025, encabezado por la Presidenta del DIF Municipal Ana
+                    Gabriela Delgado </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 35 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1296795734697596%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">¡Este domingo comenzó la Caravana de Día de Reyes del DIF Municipal!, Con la presencia
+                    del Presidente Municipal Fernando Huerta y la Presidenta del DIF, Gabriela Delgado de Huerta, se dio
+                    el banderazo de arranque.Más de 22 mil juguetes serán repartidos en las comunidades del municipio.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 36 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F3076956552451547%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Madres Solteras, Padres Solteros, Personas con Discapacidad y Adultos Mayores, son
+                    beneficiados con la condonación del Predial.✅</div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 37 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1869745257099699%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Orden vial y protección a las familias se percibe en nuestra ciudad.
+                    ✅#CompromisoCumplido
+                    #TransitoVialMunicipal
+                    iJuntos si podemos!
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 38 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1357530032287254%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">Para los adultos mayores no pagar el predial es un privilegio, gracias al presidente
+                    Fernando Huerta Cerecedo ¡Promesa Cumplida✅!
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 39 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1119785269556430%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">En Casa de la cultura nuestros Adultos Mayores, Madres Solteras y Personas con
+                    Discapacidad, podrán realizar su trámite del predial sin costo alguno. ¡No pierdas esta oportunidad!
+                    🏠#JuntosSiPodemos #FernandoHuerta .
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+            <!-- 40 -->
+            <article class="card-reel is-appearing">
+                <div class="media">
+                  <div class="skeleton"></div>
+                    <iframe loading="lazy"
+                        src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F483931110991554%2F&show_text=false&autoplay=0&mute=1"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+                </div>
+                <div class="desc">En la plaza de las artesanías “Felipe Matías Velasco” nuestros Adultos Mayores, Madres
+                    Solteras y Personas con Discapacidad, podrán realizar su trámite del predial SIN COSTO ALGUNO. ¡No
+                    pierdas esta oportunidad! 🏠 #JuntosSiPodemos #FernandoHuerta Ver.
+                </div>
+                <button class="btn-more" type="button" aria-expanded="false">Ver más</button>
+            </article>
+
+    </div><!-- /grid-reels -->
+  </section>
+
+  <!-- =================== FOOTER =================== -->
+  <div class="footer-container">
+    <div class="wave-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="#7f1d1d" fill-opacity="0.3" d="M0,280 Q90,330,180,280 T360,280 T540,280 T720,280 T900,280 T1080,280 T1260,280 T1440,280 V320 H0 Z"></path>
+        <path fill="#7f1d1d" fill-opacity="0.5" d="M0,285 Q90,335,180,285 T360,285 T540,285 T720,285 T900,285 T1080,285 T1260,285 T1440,285 V320 H0 Z"></path>
+        <path fill="#7f1d1d" fill-opacity="0.7" d="M0,290 Q90,340,180,290 T360,290 T540,290 T720,290 T900,290 T1080,290 T1260,290 T1440,290 V320 H0 Z"></path>
+        <path fill="#7f1d1d" d="M0,295 Q90,345,180,295 T360,295 T540,295 T720,295 T900,295 T1080,295 T1260,295 T1440,295 V320 H0 Z"></path>
+      </svg>
+    </div>
+
+    <footer class="bg-red-900 text-white w-full">
+      <div class="custom-container py-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Contacto -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-2xl font-bold mb-6">Contacto</h3>
+            <div class="text-justify px-4 space-y-4">
+              <div class="flex items-start space-x-3">
+                <i class="fas fa-map-marker-alt mt-1"></i>
+                <p>Av. 5 de Mayo #281 entre Allende y Guerrero, Col. Centro, CP 68300, San Juan Bautista Tuxtepec, Oaxaca, México.</p>
+              </div>
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-phone"></i>
+                <a href="tel:+522878751454"><p>287 875 1454</p></a>
+              </div>
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-envelope"></i>
+                <a href="mailto:atencion.ciudadana@tuxtepec.gob.mx" target="_blank"><p>atencion.ciudadana@tuxtepec.gob.mx</p></a>
+              </div>
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-phone"></i>
+                <a href="tel:+522878752684"><p>287 875 2684</p></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-2xl font-bold mb-6">Ubicación</h3>
+            <div class="footer-map px-4">
+              <div class="map-wrap">
+                <iframe
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1349.3079387585308!2d-96.11888302906694!3d18.081080172242128!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85c3e7cde0ddd4e9%3A0xe5da815fcf990a49!2sAyuntamiento%20Municipio%20De%20San%20Juan%20Bautista%20Tuxtepec!5e1!3m2!1ses-419!2smx!4v1736267713559!5m2!1ses-419!2smx">
+                </iframe>
+              </div>
+            </div>
+          </div>
+
+          <!-- Redes -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-2xl font-bold mb-6">Síguenos</h3>
+            <div class="flex justify-center space-x-6">
+              <a href="https://www.facebook.com/share/15k8iovFxn/?mibextid=wwXIfr" class="hover:text-gray-300 transform hover:scale-110 transition-transform duration-200">
+                <i class="fab fa-facebook fa-2x"></i>
+              </a>
+              <a href="https://www.instagram.com/gobiernodetuxtepec/profilecard/?igsh=b3JqYms3eHIzaGU5" class="hover:text-gray-300 transform hover:scale-110 transition-transform duration-200">
+                <i class="fab fa-instagram fa-2x"></i>
+              </a>
+              <a href="https://whatsapp.com/channel/0029Vb2PN6Q9mrGcRr0vYD1r" class="hover:text-gray-300 transform hover:scale-110 transition-transform duration-200">
+                <i class="fab fa-whatsapp fa-2x"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========= Modal (antes de los scripts que lo usan) ========= -->
+  <div id="reelModal" aria-hidden="true">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose" aria-label="Cerrar"><i class="fa fa-times"></i></button>
+      <div class="modal-media">
+        <iframe id="modalIframe" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts del sitio -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="https://tuxtepec.gob.mx/sitio/js/sesicabi.js"></script>
+  <script src="https://tuxtepec.gob.mx/sitio/js/script.js"></script>
+
+  <!-- ==== Lógica de “ver más / ver menos” (clamp) ==== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.card-reel').forEach(card => {
+        const desc = card.querySelector('.desc');
+        const btn = card.querySelector('.btn-more');
+        if (!desc || !btn) return;
+
+        const linesAttr = parseInt(card.getAttribute('data-lines'), 10);
+        if (Number.isFinite(linesAttr)) desc.style.setProperty('--lines', linesAttr);
+
+        // aplicar clamp inicial
+        desc.classList.add('is-clamped');
+
+        const needsClamp = () => {
+          desc.classList.remove('is-clamped');
+          const full = desc.scrollHeight;
+          desc.classList.add('is-clamped');
+          const cropped = desc.clientHeight;
+          return full > (cropped + 2);
+        };
+
+        if (!needsClamp()) {
+          btn.style.display = 'none';
+          return;
+        }
+
+        btn.addEventListener('click', () => {
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          if (expanded) {
+            desc.classList.add('is-clamped');
+            btn.textContent = 'Ver más';
+            btn.setAttribute('aria-expanded', 'false');
+          } else {
+            desc.classList.remove('is-clamped');
+            btn.textContent = 'Ver menos';
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+    })();
+  </script>
+
+  <!-- ==== Mejora de tarjetas + Modal (ENABLE_ACTIONS desactivado) ==== -->
+  <script>
+    (function () {
+      const ENABLE_ACTIONS = false;
+      const $ = (s, ctx = document) => ctx.querySelector(s);
+      const $$ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
+      const favKey = 'reel_favs';
+
+      function getIframeSrc(ifr){ return ifr?.getAttribute('src') || ifr?.dataset?.src || ''; }
+      function addOrReplaceParams(url, params){
+        try{ const u = new URL(url);
+          Object.entries(params).forEach(([k,v]) => v==null ? u.searchParams.delete(k) : u.searchParams.set(k,v));
+          return u.toString();
+        }catch{ return url; }
+      }
+      function getOriginalLinkFromIframe(ifr){
+        const src = getIframeSrc(ifr);
+        try{
+          const u = new URL(src);
+          const href = u.searchParams.get('href');
+          return href ? decodeURIComponent(href) : '';
+        }catch{ return ''; }
+      }
+
+      function enhanceCards(scope = document){
+        $$('.card-reel', scope).forEach((card, idx) => {
+          if (card.dataset.enhanced) return;
+          card.dataset.enhanced = '1';
+
+          // Skeleton
+          const media = $('.media', card);
+          if (media && !$('.skeleton', media)) {
+            const sk = document.createElement('div');
+            sk.className = 'skeleton';
+            media.appendChild(sk);
+          }
+          const ifr = $('iframe', media);
+          if (ifr) ifr.addEventListener('load', () => media.classList.add('loaded'), { once: true });
+
+          if (ENABLE_ACTIONS) {
+            const actions = document.createElement('div');
+            actions.className = 'r-actions';
+            actions.innerHTML = `
+              <button class="icon-btn fav"   title="Favorito"      aria-label="Favorito"><i class="fa fa-heart"></i></button>
+              <button class="icon-btn open"  title="Ampliar"       aria-label="Ampliar"><i class="fa fa-expand"></i></button>
+              <button class="icon-btn copy"  title="Copiar enlace" aria-label="Copiar enlace"><i class="fa fa-link"></i></button>`;
+            media.appendChild(actions);
+
+            const id = card.dataset.id || ('reel-' + idx);
+            card.dataset.id = id;
+
+            const favBtn = actions.querySelector('.fav');
+            const favSet = new Set(JSON.parse(localStorage.getItem(favKey) || '[]'));
+            if (favSet.has(id)) favBtn.classList.add('on');
+            favBtn.addEventListener('click', () => {
+              const set = new Set(JSON.parse(localStorage.getItem(favKey) || '[]'));
+              if (set.has(id)) { set.delete(id); favBtn.classList.remove('on'); }
+              else { set.add(id); favBtn.classList.add('on'); }
+              localStorage.setItem(favKey, JSON.stringify([...set]));
+            });
+
+            const openBtn = actions.querySelector('.open');
+            openBtn.addEventListener('click', () => {
+              const src = getIframeSrc(ifr);
+              if (!src) return;
+              openModal(addOrReplaceParams(src, { autoplay: '1', mute: '1', show_text: 'false' }));
+            });
+
+            const copyBtn = actions.querySelector('.copy');
+            copyBtn.addEventListener('click', async () => {
+              const link = getOriginalLinkFromIframe(ifr);
+              if (!link) return alert('No se pudo obtener el enlace.');
+              try { await navigator.clipboard.writeText(link); copyBtn.style.opacity = .6; setTimeout(() => copyBtn.style.opacity = 1, 450); }
+              catch { alert('Copia falló; intenta manualmente: ' + link); }
+            });
+          }
+        });
+      }
+      window.__enhanceCards = enhanceCards;
+      enhanceCards();
+
+      // Aparición suave al hacer scroll (mejora visual en móviles también)
+      const ap = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){ e.target.classList.add('show'); ap.unobserve(e.target); }
+        })
+      },{threshold:.12});
+      document.querySelectorAll('.card-reel.is-appearing').forEach(el=>ap.observe(el));
+
+      // Modal global
+      const modal = document.getElementById('reelModal');
+      const modalIframe = document.getElementById('modalIframe');
+      const modalClose = document.getElementById('modalClose');
+
+      function openModal(src){
+        modalIframe.src = src;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        modalIframe.src = 'about:blank';
+      }
+      window.openModal = openModal;
+      modalClose.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    })();
+  </script>
+</body>
+</html>
